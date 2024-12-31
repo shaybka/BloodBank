@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 // Register User
 export const registerUser = async (req, res) => {
-    const { userName, email, password } = req.body;
+    const { userName, email, password,role } = req.body;
     
     
     if (!userName || !email || !password) {
@@ -25,7 +25,7 @@ export const registerUser = async (req, res) => {
         }
 
         // Create a new user with default role 'user'
-        const userInfo = new User({ userName, email, password });
+        const userInfo = new User({ userName, email, password, role});
         await userInfo.save();
 
         // Generate JWT token with 'role'
@@ -98,27 +98,20 @@ export const loginUser = async (req, res) => {
     }
 };
 
-//  User to Admin
-export const ToAdmin = async (req, res) => {
+
+export const updateUser = async (req, res) => {
     const { userId } = req.params;
+    const updates = req.body;
 
     try {
-        // Find the user by ID
-        const user = await User.findById(userId);
+        // Find the user by ID and update with provided fields
+        const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true });
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        if (user.role === 'admin') {
-            return res.status(400).json({ message: 'User is already an admin.' });
-        }
-
-        // Update role to 'admin'
-        user.role = 'admin';
-        await user.save();
-
         res.status(200).json({
-            message: 'User become to admin successfully.',
+            message: 'User updated successfully.',
             user
         });
     } catch (error) {

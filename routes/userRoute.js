@@ -1,6 +1,6 @@
 import express from "express";
 const UserRouter = express.Router();
-import { loginUser, registerUser, ToAdmin,getUsers} from "../controllers/user.js";
+import { loginUser, registerUser, updateUser,getUsers} from "../controllers/user.js";
 import {
   authenticateToken,
   authorizeAdmin,
@@ -12,6 +12,6 @@ UserRouter.post("/login-user", loginUser);
 UserRouter.get("/", getUsers);
 
 // Admin-Only Route to Promote Users
-UserRouter.put("/promote/:userId", authenticateToken, authorizeAdmin, ToAdmin);
+UserRouter.put("/update/:userId", authenticateToken, authorizeAdmin, updateUser);
 
 export default UserRouter;
