@@ -14,7 +14,7 @@ const Staff_Schema = new Schema({
     phone: {
         type: String,
         required: true,
-        match: /^[0-9]{10,15}$/ // Validates phone number format
+        match: /^[0-9]{7,16}$/ // Validates phone number format
     },
     email: {
         type: String,
