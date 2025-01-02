@@ -1,5 +1,31 @@
 import Donor from '../models/DonorModel.js';
+// import Donation from '../models/DonationModel.js';
 
+
+
+
+// Get All Donation Histories
+export const getAllDonationHistories = async (req, res) => {
+    try {
+        // Fetch all donors and populate their donation histories
+        const donors = await Donor.find()
+            .populate({
+                path: 'donationHistory.donation_id',
+                select: 'blood_type quantity donation_date location notes'
+            });
+
+        res.status(200).json({
+            message: 'Donation histories retrieved successfully',
+            donationHistories: donors.map(donor => ({
+                donorName: donor.name,
+                donations: donor.donationHistory.map(history => history.donation_id)
+            }))
+        });
+    } catch (error) {
+        console.error(`Error fetching donation histories: ${error.message}`);
+        res.status(500).json({ message: `Server error: ${error.message}` });
+    }
+};
 
 export const createDonor = async (req, res) => {
     const { name, age, bloodGroup, phone, email, address } = req.body;

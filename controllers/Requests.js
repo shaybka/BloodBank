@@ -2,6 +2,17 @@ import Request from '../models/RequestsModel.js';
 import Hospital from '../models/Hospitals.js';
 import BloodInventory from '../models/BloodInventoryModel.js';
 
+// Get count of all requests
+export const getRequestCount = async (req, res) => {
+  try {
+    const count = await Request.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
 // Create a Blood Request
 export const createRequest = async (req, res) => {
     const { hospitalId, bloodType, quantity } = req.body;
@@ -82,14 +93,20 @@ export const getRequestById = async (req, res) => {
     }
 };
 
-// Update Blood Request Status
-export const updateRequestStatus = async (req, res) => {
+// Update Blood Request
+export const updateRequest = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { hospitalId, bloodType, quantity, status } = req.body;
 
     const validStatuses = ["pending", "completed", "cancelled"];
-    if (!validStatuses.includes(status)) {
+    const validBloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+    if (status && !validStatuses.includes(status)) {
         return res.status(400).json({ message: 'Invalid status value.' });
+    }
+
+    if (bloodType && !validBloodTypes.includes(bloodType)) {
+        return res.status(400).json({ message: 'Invalid blood type.' });
     }
 
     try {
@@ -98,23 +115,34 @@ export const updateRequestStatus = async (req, res) => {
             return res.status(404).json({ message: 'Request not found.' });
         }
 
-        request.status = status;
+        if (hospitalId) {
+            const hospital = await Hospital.findById(hospitalId);
+            if (!hospital) {
+                return res.status(404).json({ message: 'Hospital not found.' });
+            }
+            request.hospital_id = hospitalId;
+        }
+
+        if (bloodType) request.blood_type = bloodType;
+        if (quantity) request.quantity = quantity;
+        if (status) request.status = status;
+
         if (status === "completed") {
             // Deduct from Blood Inventory
             const inventory = await BloodInventory.findOne({ blood_type: request.blood_type });
             if (inventory && inventory.quantity >= request.quantity) {
                 inventory.quantity -= request.quantity;
                 await inventory.save();
+                request.completion_date = new Date();
             } else {
                 return res.status(400).json({ message: 'Insufficient blood inventory to complete the request.' });
             }
-            request.completion_date = new Date();
         }
 
         await request.save();
 
         res.status(200).json({
-            message: 'Blood request status updated successfully.',
+            message: 'Blood request updated successfully.',
             request
         });
     } catch (error) {

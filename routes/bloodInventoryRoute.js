@@ -3,6 +3,8 @@ import {
     getAllBloodInventory,
     getBloodInventoryByType,
     createBloodInventory,
+    getBloodInventoryCount,
+    getBloodGroupCounts,
     updateBloodInventory,
     deleteBloodInventory
 } from '../controllers/BloodInventory.js';
@@ -17,12 +19,13 @@ BloodInventoryRouter.get('/', authenticateToken, getAllBloodInventory);
 BloodInventoryRouter.get('/:bloodType', authenticateToken, getBloodInventoryByType);
 
 // Create Blood Inventory (Admin Only)
-BloodInventoryRouter.post('/', authenticateToken, authorizeAdmin, createBloodInventory);
+BloodInventoryRouter.post('/', authenticateToken, createBloodInventory);
 
 // Update Blood Inventory (Admin Only)
-BloodInventoryRouter.put('/:id', authenticateToken, authorizeAdmin, updateBloodInventory);
+BloodInventoryRouter.put('/:id', authenticateToken, updateBloodInventory);
 
 // Delete Blood Inventory (Admin Only)
-BloodInventoryRouter.delete('/:id', authenticateToken, authorizeAdmin, deleteBloodInventory);
-
+BloodInventoryRouter.delete('/:id', authenticateToken, deleteBloodInventory);
+BloodInventoryRouter.get('/count', authenticateToken, getBloodInventoryCount);
+BloodInventoryRouter.get('/groups', authenticateToken, getBloodGroupCounts);
 export default BloodInventoryRouter;

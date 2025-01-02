@@ -64,16 +64,28 @@ export const makeDonation = async (req, res) => {
     }
 };
 
-// Get All Donations
+// Get count of all donations
+export const getDonationCount = async (req, res) => {
+  try {
+    const count = await Donation.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
 export const getAllDonations = async (req, res) => {
     try {
-        const donations = await Donation.find().populate('donor_id', 'name email');
+        // Populate 'donor_id' with the donor's 'name'
+        const donations = await Donation.find().populate('donor_id', 'name');
+
         res.status(200).json({
-            message: 'Donations retrieved successfully.',
+            message: 'Donations retrieved successfully',
             donations
         });
     } catch (error) {
-        console.error(error.message);
+        console.error(`Error fetching donations: ${error.message}`);
         res.status(500).json({ message: `Server error: ${error.message}` });
     }
 };

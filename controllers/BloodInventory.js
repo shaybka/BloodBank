@@ -1,5 +1,51 @@
 import BloodInventory from '../models/BloodInventoryModel.js';
 
+// Create Blood Inventory
+export const createBloodInventory = async (req, res) => {
+    const { bloodType, quantity, storageLocation, expiryDate } = req.body;
+
+    // Validate input
+    if (!bloodType || quantity == null || !storageLocation || !expiryDate) {
+        return res.status(400).json({ message: 'Please provide all required fields: bloodType, quantity, storageLocation, expiryDate.' });
+    }
+
+    const validBloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+    if (!validBloodTypes.includes(bloodType)) {
+        return res.status(400).json({ message: 'Invalid blood type.' });
+    }
+
+    try {
+        // Check if the combination of bloodType and storageLocation already exists
+        const existingInventory = await BloodInventory.findOne({
+            blood_type: bloodType,
+            storage_location: storageLocation
+        });
+
+        if (existingInventory) {
+            return res.status(400).json({ message: 'Blood inventory with this blood type and storage location already exists.' });
+        }
+
+        // Create new blood inventory
+        const newInventory = new BloodInventory({
+            blood_type: bloodType,
+            quantity,
+            storage_location: storageLocation,
+            expiry_date: new Date(expiryDate)
+        });
+
+        await newInventory.save();
+
+        res.status(201).json({
+            message: 'Blood inventory created successfully.',
+            inventory: newInventory
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: `Server error: ${error.message}` });
+    }
+};
+
 // Get All Blood Inventory
 export const getAllBloodInventory = async (req, res) => {
     try {
@@ -34,48 +80,7 @@ export const getBloodInventoryByType = async (req, res) => {
     }
 };
 
-// Create Blood Inventory
-export const createBloodInventory = async (req, res) => {
-    const { bloodType, quantity, storageLocation, expiryDate } = req.body;
 
-    // Validate input
-    if (!bloodType || quantity == null || !storageLocation || !expiryDate) {
-        return res.status(400).json({ message: 'Please provide all required fields: bloodType, quantity, storageLocation, expiryDate.' });
-    }
-
-    // Validate blood type
-    const validBloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    if (!validBloodTypes.includes(bloodType)) {
-        return res.status(400).json({ message: 'Invalid blood type.' });
-    }
-
-    try {
-        // Check if inventory for the blood type already exists
-        const existingInventory = await BloodInventory.findOne({ blood_type: bloodType });
-        if (existingInventory) {
-            return res.status(400).json({ message: 'Blood inventory for this type already exists. Use update endpoint to modify quantity.' });
-        }
-
-        // Create new blood inventory
-        const newInventory = new BloodInventory({
-            blood_type: bloodType,
-            quantity,
-            storage_location: storageLocation,
-            expiry_date: new Date(expiryDate)
-        });
-
-        await newInventory.save();
-
-        res.status(201).json({
-            message: 'Blood inventory created successfully.',
-            inventory: newInventory
-        });
-
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: `Server error: ${error.message}` });
-    }
-};
 
 // Update Blood Inventory
 export const updateBloodInventory = async (req, res) => {
@@ -123,4 +128,29 @@ export const deleteBloodInventory = async (req, res) => {
         console.error(error.message);
         res.status(500).json({ message: `Server error: ${error.message}` });
     }
+};
+
+// Get count of all blood inventory
+export const getBloodInventoryCount = async (req, res) => {
+  try {
+    const count = await BloodInventory.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
+// Get blood group counts
+export const getBloodGroupCounts = async (req, res) => {
+  try {
+    const groups = await BloodInventory.aggregate([
+      { $group: { _id: "$blood_type", count: { $sum: "$quantity" } } },
+      { $project: { _id: 0, group: "$_id", count: 1 } }
+    ]);
+    res.status(200).json({ groups });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
 };

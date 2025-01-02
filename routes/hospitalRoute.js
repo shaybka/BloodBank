@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerHospital, updateHospital,verifyHospital, deleteHospital, getAllHospitals, getHospitalById } from '../controllers/Hospital.js';
+import { registerHospital, updateHospital, deleteHospital, getAllHospitals, getHospitalById, checkDuplicateHospital } from '../controllers/Hospital.js';
 import { authenticateToken, authorizeAdmin } from '../middleware/Authenticate.js';
 
 const HospitalRouter = express.Router();
@@ -8,7 +8,7 @@ const HospitalRouter = express.Router();
 HospitalRouter.post('/register', authenticateToken, authorizeAdmin, registerHospital);
 HospitalRouter.put('/update/:id', authenticateToken, authorizeAdmin, updateHospital);
 HospitalRouter.delete('/delete/:id', authenticateToken, authorizeAdmin, deleteHospital);
-HospitalRouter.put('/verify/:id', authenticateToken, authorizeAdmin, verifyHospital);
+HospitalRouter.post('/check-duplicate', authenticateToken, authorizeAdmin, checkDuplicateHospital);
 
 // Authenticated User Routes
 HospitalRouter.get('/', authenticateToken, getAllHospitals);

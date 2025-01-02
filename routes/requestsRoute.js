@@ -3,8 +3,8 @@ import {
   createRequest,
   getAllRequests,
   getRequestById,
-  updateRequestStatus,
-  deleteRequest,
+  updateRequest,
+  deleteRequest,getRequestCount
 } from "../controllers/Requests.js";
 import {
   authenticateToken,
@@ -13,21 +13,14 @@ import {
 
 const RequestsRouter = express.Router();
 
-
 RequestsRouter.post("/", authenticateToken, createRequest);
+RequestsRouter.get('/count', authenticateToken, getRequestCount);
 
 RequestsRouter.get("/", authenticateToken, getAllRequests);
 
 RequestsRouter.get("/:id", authenticateToken, getRequestById);
 
-
-RequestsRouter.put(
-  "/:id/status",
-  authenticateToken,
-  authorizeAdmin,
-  updateRequestStatus
-);
-
+RequestsRouter.put("/:id", authenticateToken, authorizeAdmin, updateRequest);
 
 RequestsRouter.delete("/:id", authenticateToken, authorizeAdmin, deleteRequest);
 
