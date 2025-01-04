@@ -3,8 +3,6 @@ import {
     getAllBloodInventory,
     getBloodInventoryByType,
     createBloodInventory,
-    getBloodInventoryCount,
-    getBloodGroupCounts,
     updateBloodInventory,
     deleteBloodInventory
 } from '../controllers/BloodInventory.js';
@@ -26,6 +24,7 @@ BloodInventoryRouter.put('/:id', authenticateToken, updateBloodInventory);
 
 // Delete Blood Inventory (Admin Only)
 BloodInventoryRouter.delete('/:id', authenticateToken, deleteBloodInventory);
-BloodInventoryRouter.get('/count', authenticateToken, getBloodInventoryCount);
-BloodInventoryRouter.get('/groups', authenticateToken, getBloodGroupCounts);
+
+
+
 export default BloodInventoryRouter;

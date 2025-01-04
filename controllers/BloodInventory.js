@@ -130,27 +130,5 @@ export const deleteBloodInventory = async (req, res) => {
     }
 };
 
-// Get count of all blood inventory
-export const getBloodInventoryCount = async (req, res) => {
-  try {
-    const count = await BloodInventory.countDocuments();
-    res.status(200).json({ count });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: `Server error: ${error.message}` });
-  }
-};
 
-// Get blood group counts
-export const getBloodGroupCounts = async (req, res) => {
-  try {
-    const groups = await BloodInventory.aggregate([
-      { $group: { _id: "$blood_type", count: { $sum: "$quantity" } } },
-      { $project: { _id: 0, group: "$_id", count: 1 } }
-    ]);
-    res.status(200).json({ groups });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: `Server error: ${error.message}` });
-  }
-};
+
